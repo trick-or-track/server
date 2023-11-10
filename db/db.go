@@ -2,11 +2,13 @@ package db
 
 import (
 	"database/sql"
+	"os"
+
 	_ "github.com/lib/pq"
 )
 
 func New() (*sql.DB, error) {
-	connStr := "user=postgres dbname=test_server password=postgrespw sslmode=disable port=55000"
+	connStr := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err

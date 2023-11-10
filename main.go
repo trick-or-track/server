@@ -2,15 +2,18 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/trick-or-track/server/db"
 	"github.com/trick-or-track/server/handler"
 	"github.com/trick-or-track/server/router"
 	"github.com/trick-or-track/server/store"
+	"github.com/trick-or-track/server/utils"
 )
 
 func main() {
+	utils.LoadEnv()
 	r := router.New()
 	r.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "server running")
@@ -29,5 +32,5 @@ func main() {
 	handler := handler.NewHandler(dataStore, userStore)
 	handler.Register(v1)
 
-	r.Logger.Fatal(r.Start(":4000"))
+	r.Logger.Fatal(r.Start(":" + os.Getenv("PORT")))
 }
