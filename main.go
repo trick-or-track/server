@@ -32,5 +32,5 @@ func main() {
 	handler := handler.NewHandler(dataStore, userStore)
 	handler.Register(v1)
 
-	r.Logger.Fatal(r.Start(":" + os.Getenv("PORT")))
+	r.Logger.Fatal(r.Start(os.Getenv("PORT")))
 }
