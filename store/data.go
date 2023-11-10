@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/trick-or-track/server/model"
@@ -51,6 +52,9 @@ func (ds *DataStore) Create(data *model.Data) error {
 		data.Ten,
 		time.Now().UTC(),
 	).Scan(&insertedId); err != nil {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"data_unique_year_user_id\"" {
+			return fmt.Errorf("Data all ready collected for year %d", data.Year)
+		}
 		return err
 	}
 	data.ID = insertedId
