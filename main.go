@@ -9,11 +9,9 @@ import (
 	"github.com/trick-or-track/server/handler"
 	"github.com/trick-or-track/server/router"
 	"github.com/trick-or-track/server/store"
-	"github.com/trick-or-track/server/utils"
 )
 
 func main() {
-	utils.LoadEnv()
 	r := router.New()
 	r.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "server running")
