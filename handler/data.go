@@ -28,11 +28,11 @@ func (h *Handler) GetDataByUserID(c echo.Context) error {
 
 	from, err := strconv.Atoi(_from)
 	if err != nil {
-		from = 2018 // TODO default 5 years
+		from = utils.YearsAgo(5)
 	}
 	to, err := strconv.Atoi(_to)
 	if err != nil {
-		to = 2023 // TODO default this year
+		to = utils.CurrentYear()
 	}
 	d, err := h.dataStore.GetByUserID(userID, from, to)
 	if err != nil {
@@ -47,11 +47,11 @@ func (h *Handler) GetDataYearly(c echo.Context) error {
 
 	from, err := strconv.Atoi(_from)
 	if err != nil {
-		from = 2018 // TODO default 5 years
+		from = utils.YearsAgo(5)
 	}
 	to, err := strconv.Atoi(_to)
 	if err != nil {
-		to = 2023 // TODO default this year
+		to = utils.CurrentYear()
 	}
 
 	d, err := h.dataStore.GetYearly(from, to)

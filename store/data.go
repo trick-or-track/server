@@ -73,11 +73,12 @@ func (ds *DataStore) GetByUserID(userID, from, to int) ([]*model.Data, error) {
 	WHERE user_id = $1 
 	AND year > $2 
 	AND year < $3
-	ORDER BY year DESC;`, userID, from ,to)
+	ORDER BY year DESC;`, userID, from, to)
 	if err != nil {
 		return nil, err
 	}
 
+	pointer := from
 	for rows.Next() {
 		var m model.Data
 		if err := rows.Scan(
@@ -97,12 +98,27 @@ func (ds *DataStore) GetByUserID(userID, from, to int) ([]*model.Data, error) {
 		); err != nil {
 			return nil, err
 		}
+		for pointer < m.Year {
+			t := &model.Data{
+				Year: pointer,
+			}
+			result = append(result, t)
+			pointer++
+		}
 		result = append(result, &m)
+		pointer++
+	}
+	for pointer <= to {
+		t := &model.Data{
+			Year: pointer,
+		}
+		result = append(result, t)
+		pointer++
 	}
 	return result, nil
 }
 
-func (ds *DataStore) GetYearly(start, end int) ([]*model.Data, error) {
+func (ds *DataStore) GetYearly(from, to int) ([]*model.Data, error) {
 	rows, err := ds.db.Query(`
 	SELECT 
 		year, 
@@ -117,12 +133,13 @@ func (ds *DataStore) GetYearly(start, end int) ([]*model.Data, error) {
 		SUM(nine) nine,
 		SUM(ten) ten
 	FROM data 
-	WHERE year >= $1 AND year <= $2 GROUP BY year ORDER BY year ASC;`, start, end)
+	WHERE year >= $1 AND year <= $2 GROUP BY year ORDER BY year ASC;`, from, to)
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*model.Data
+	pointer := from
 	for rows.Next() {
 		var m model.Data
 		if err := rows.Scan(
@@ -141,10 +158,22 @@ func (ds *DataStore) GetYearly(start, end int) ([]*model.Data, error) {
 			return nil, err
 		}
 		m.ID = m.Year
+		for pointer < m.Year {
+			t := &model.Data{
+				Year: pointer,
+			}
+			result = append(result, t)
+			pointer++
+		}
 		result = append(result, &m)
+		pointer++
 	}
-	if err != nil {
-		return nil, err
+	for pointer <= to {
+		t := &model.Data{
+			Year: pointer,
+		}
+		result = append(result, t)
+		pointer++
 	}
 	return result, nil
 }
