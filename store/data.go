@@ -61,7 +61,7 @@ func (ds *DataStore) Create(data *model.Data) error {
 	return nil
 }
 
-func (ds *DataStore) GetByUserID(userID int) ([]*model.Data, error) {
+func (ds *DataStore) GetByUserID(userID, from, to int) ([]*model.Data, error) {
 	var result []*model.Data
 	rows, err := ds.db.Query(`
 	SELECT 
@@ -70,7 +70,10 @@ func (ds *DataStore) GetByUserID(userID int) ([]*model.Data, error) {
 		four, five, six, 
 		seven, eight, nine, ten
 	FROM data 
-	WHERE user_id = $1 ORDER BY year DESC;`, userID)
+	WHERE user_id = $1 
+	AND year > $2 
+	AND year < $3
+	ORDER BY year DESC;`, userID, from ,to)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +98,53 @@ func (ds *DataStore) GetByUserID(userID int) ([]*model.Data, error) {
 			return nil, err
 		}
 		result = append(result, &m)
+	}
+	return result, nil
+}
+
+func (ds *DataStore) GetYearly(start, end int) ([]*model.Data, error) {
+	rows, err := ds.db.Query(`
+	SELECT 
+		year, 
+		SUM(one),
+		SUM(two) two,
+		SUM(three) three,
+		SUM(four) four,
+		SUM(five) five,
+		SUM(six) six,
+		SUM(seven) seven,
+		SUM(eight) eight,
+		SUM(nine) nine,
+		SUM(ten) ten
+	FROM data 
+	WHERE year >= $1 AND year <= $2 GROUP BY year ORDER BY year ASC;`, start, end)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*model.Data
+	for rows.Next() {
+		var m model.Data
+		if err := rows.Scan(
+			&m.Year,
+			&m.One,
+			&m.Two,
+			&m.Three,
+			&m.Four,
+			&m.Five,
+			&m.Six,
+			&m.Seven,
+			&m.Eight,
+			&m.Nine,
+			&m.Ten,
+		); err != nil {
+			return nil, err
+		}
+		m.ID = m.Year
+		result = append(result, &m)
+	}
+	if err != nil {
+		return nil, err
 	}
 	return result, nil
 }

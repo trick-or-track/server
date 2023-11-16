@@ -27,4 +27,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	data := v1.Group("/data", jwtMiddleWare)
 	data.GET("", h.GetDataByUserID)
 	data.POST("", h.AddData)
+
+	chart := data.Group("/yearly")
+	chart.GET("", h.GetDataYearly)
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/trick-or-track/server/model"
@@ -22,7 +23,38 @@ func (h *Handler) AddData(c echo.Context) error {
 
 func (h *Handler) GetDataByUserID(c echo.Context) error {
 	userID := userIDFromToken(c)
-	d, err := h.dataStore.GetByUserID(userID)
+	_from := c.QueryParam("from")
+	_to := c.QueryParam("to")
+
+	from, err := strconv.Atoi(_from)
+	if err != nil {
+		from = 2018 // TODO default 5 years
+	}
+	to, err := strconv.Atoi(_to)
+	if err != nil {
+		to = 2023 // TODO default this year
+	}
+	d, err := h.dataStore.GetByUserID(userID, from, to)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewError(err))
+	}
+	return c.JSON(http.StatusOK, newDataResponse(d))
+}
+
+func (h *Handler) GetDataYearly(c echo.Context) error {
+	_from := c.QueryParam("from")
+	_to := c.QueryParam("to")
+
+	from, err := strconv.Atoi(_from)
+	if err != nil {
+		from = 2018 // TODO default 5 years
+	}
+	to, err := strconv.Atoi(_to)
+	if err != nil {
+		to = 2023 // TODO default this year
+	}
+
+	d, err := h.dataStore.GetYearly(from, to)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewError(err))
 	}
